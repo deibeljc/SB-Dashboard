@@ -26,7 +26,6 @@ namespace SmartBot.Plugins {
         }
 
         public override void OnStarted() {
-            Init();
         }
 
         public override void OnVictory() {
