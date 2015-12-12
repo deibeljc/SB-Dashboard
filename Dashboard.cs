@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using System.Windows.Forms;
 using Fleck;
 using SmartBot.Plugins.API;
 
@@ -25,6 +26,11 @@ namespace SmartBot.Plugins {
             Init();
         }
 
+        public override void Dispose() {
+            _server.Stop();
+            Debug.OnLogReceived -= OnLogging;
+        }
+
         public override void OnVictory() {
             _board.Wins++;
         }
@@ -33,8 +39,15 @@ namespace SmartBot.Plugins {
             _board.Losses++;
         }
 
-        private void OnLog(string message) {
-            Bot.Log("I was invoked..");
+        public override void OnStarted() {
+            _board.BotStarted = true;
+        }
+
+        public override void OnStopped() {
+            _board.BotStarted = false;
+        }
+
+        private void OnLogging(string message) {
             _board.Log.Add(message);
         }
 
@@ -45,23 +58,32 @@ namespace SmartBot.Plugins {
                 _board.Enemy = Bot.CurrentBoard.HeroEnemy;
                 _board.EnemyId = Bot.CurrentBoard.HeroEnemy.Template.Id.ToString();
             }
+          
             _stream = new MemoryStream();
             _json.WriteObject(_stream, _board);
             _stream.Position = 0;
             var sr = new StreamReader(_stream);
             var boardStateString = sr.ReadToEnd();
             _server.Send(boardStateString);
+
+            // After send dump the logs since we already sent them.
+            _board.Log = new List<string>();
         }
 
         private void Init() {
             Bot.Log("[PLUGIN] -> Dashboard: Plugin Created");
             // Events
-            Debug.OnLogReceived += OnLog;
+            Debug.OnLogReceived += OnLogging;
             _server.Start();
+
+            // Init the _board objects if needed.
+            _board.Log = new List<string>();
+            _board.BotStarted = false;
         }
     }
 
     public class BoardCdm {
+        public Boolean BotStarted { get; set; }
         public int Wins { get; set; }
         public int Losses { get; set; }
         public Card Hero { get; set; }
@@ -74,26 +96,42 @@ namespace SmartBot.Plugins {
     
     public class Server {
         readonly List<IWebSocketConnection> _allSockets = new List<IWebSocketConnection>();
+        readonly IWebSocketServer _server = new WebSocketServer("ws://127.0.0.1:8081");
 
         public void Start() {
-            var server = new WebSocketServer("ws://127.0.0.1:8081");
-            server.Start(socket => {
+            _server.Start(socket => {
                 socket.OnOpen = () => {
-                    Bot.Log("[Plugin] -> Dashboard: Client connected...");
+                    Bot.Log("[PLUGIN] -> Dashboard: Client connected...");
                     _allSockets.Add(socket);
                 };
                 socket.OnClose = () => {
                     _allSockets.Remove(socket);
-                    Bot.Log("[Plugin] -> Dashboard: Client disconnected...");
+                    Bot.Log("[PLUGIN] -> Dashboard: Client disconnected...");
                 };
+                socket.OnMessage = HandleMessage;
             });
 
-            Bot.Log("[Plugin] -> Dashboard: Server started...");
+            Bot.Log("[PLUGIN] -> Dashboard: Server started...");
+        }
+
+        public void Stop() {
+            _server.Dispose();
         }
 
         public void Send(String message) {
             foreach(var socket in _allSockets) {
                 socket.Send(message);
+            }
+        }
+
+        private void HandleMessage(String message) {
+            switch (message) {
+                case "start":
+                    Bot.StartBot();
+                    break;
+                case "stop":
+                    Bot.StopBot();
+                    break;
             }
         }
     }

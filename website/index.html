@@ -7,29 +7,7 @@
         <link rel="stylesheet" type="text/css" href="css/site.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.js"></script>
-        <script>
-        $(document).ready(function() {
-            var socket = new WebSocket("ws://localhost:8081");
-            /** Socket things */
-            socket.onmessage = function(msg){
-                var msgJson = JSON.parse(msg.data);
-                // This is really shitty... I will eventually clean this up lol
-                // Update the whole board
-                var imageUrl = 'http://wow.zamimg.com/images/hearthstone/';
-                if (_.get(msgJson, 'Hero') && _.get(msgJson, 'Enemy')) {
-                    $('.hero img').prop('src', imageUrl + 'heroes/' + msgJson.HeroId + '.png');
-                    $('.hero h4').html(msgJson.Hero.Template["<Name>k__BackingField"].split(" ")[0]);
-                    $('.hero span').html(msgJson.Hero.CurrentHealth + '/' + msgJson.Hero.MaxHealth);
-                    $('.enemy img').prop('src', imageUrl + 'heroes/' + msgJson.EnemyId + '.png');
-                    $('.enemy h4').html(msgJson.Enemy.Template["<Name>k__BackingField"].split(" ")[0]);
-                    $('.enemy span').html(msgJson.Enemy.CurrentHealth + '/' + msgJson.Enemy.MaxHealth);
-                }
-            }
-
-            // Some app things
-
-        });
-        </script>
+        <script src="js/app.js"></script>
     </head>
         <body>
         <div class="container-fluid">
@@ -51,36 +29,26 @@
               <h1 class="page-header">Dashboard</h1>
 
               <div class="row placeholders">
-                <div class="col-xs-6 col-sm-3 placeholder">
-                  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-                  <h4>Label</h4>
-                  <span class="text-muted">Something else</span>
+                <div class="well col-xs-4 placeholder">
+                    In Game: <span class="in-game"></span>
+                    <div class="wins col-xs-2 well">
+                        0
+                    </div>
+                    <div class="losses col-xs-2 well">
+                        0
+                    </div>
                 </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-                  <h4>Label</h4>
-                  <span class="text-muted">Something else</span>
-                </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-                  <h4>Label</h4>
-                  <span class="text-muted">Something else</span>
-                </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-                  <h4>Label</h4>
-                  <span class="text-muted">Something else</span>
+
+                <div class="col-xs-4">
+                    <button onclick="sendStart()" class="btn btn-default">Start</button>
+                    <button onclick="sendStop()" class="btn btn-default">Stop</button>
                 </div>
               </div>
 
               <h2 class="sub-header">Logs</h2>
               <div class="table-responsive">
                     <ul class="list-group log-scroll">
-                        <li class="list-group-item">Cras justo odio</li>
-                        <li class="list-group-item">Dapibus ac facilisis in</li>
-                        <li class="list-group-item">Morbi leo risus</li>
-                        <li class="list-group-item">Porta ac consectetur ac</li>
-                        <li class="list-group-item">Vestibulum at eros</li>
+
                     </ul>
               </div>
             </div>
