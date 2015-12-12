@@ -2,3 +2,5 @@ Properties/
 obj/
 bin/
 Dashboard.csproj
+Dashboard.sln
+.vs/

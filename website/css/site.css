@@ -93,3 +93,8 @@
   display: inline-block;
   border-radius: 50%;
 }
+
+.log-scroll {
+    height: 250px;
+    overflow-y: auto;
+}

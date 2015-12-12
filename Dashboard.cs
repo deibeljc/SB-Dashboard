@@ -1,31 +1,28 @@
 ﻿using System;
-using System.Runtime.Serialization.Json;
-using SmartBot.Plugins.API;
 using System.Collections.Generic;
-using Fleck;
 using System.IO;
+using System.Runtime.Serialization.Json;
+using Fleck;
+using SmartBot.Plugins.API;
 
 namespace SmartBot.Plugins {
     [Serializable]
     class BPluginDataContainer : PluginDataContainer {
-        public int SomeGoldAmount { get; set; }
-
+    
         public BPluginDataContainer() {
             Name = "SmartBotDashboard";
         }
     }
 
     public class DashBoard : Plugin {
+        // Variables
         readonly Server _server = new Server();
         readonly BoardCdm _board = new BoardCdm();
         MemoryStream _stream = new MemoryStream();
-        DataContractJsonSerializer _json = new DataContractJsonSerializer(typeof(BoardCdm));
+        readonly DataContractJsonSerializer _json = new DataContractJsonSerializer(typeof(BoardCdm));
 
         public override void OnPluginCreated() {
             Init();
-        }
-
-        public override void OnStarted() {
         }
 
         public override void OnVictory() {
@@ -34,6 +31,11 @@ namespace SmartBot.Plugins {
 
         public override void OnDefeat() {
             _board.Losses++;
+        }
+
+        private void OnLog(string message) {
+            Bot.Log("I was invoked..");
+            _board.Log.Add(message);
         }
 
         public override void OnTick() {
@@ -53,6 +55,8 @@ namespace SmartBot.Plugins {
 
         private void Init() {
             Bot.Log("[PLUGIN] -> Dashboard: Plugin Created");
+            // Events
+            Debug.OnLogReceived += OnLog;
             _server.Start();
         }
     }
@@ -64,6 +68,7 @@ namespace SmartBot.Plugins {
         public String HeroId { get; set; }
         public Card Enemy { get; set; }
         public String EnemyId { get; set; }
+        public List<String> Log { get; set; } 
     }
 
     
