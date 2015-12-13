@@ -5,7 +5,7 @@ $(document).ready(function() {
     socket.onmessage = function(msg){
         var msgJson = JSON.parse(msg.data);
         // This is really shitty... I will eventually clean this up lol
-        
+
         // Update the whole board
         var imageUrl = 'http://wow.zamimg.com/images/hearthstone/';
         if (_.get(msgJson, 'Hero') && _.get(msgJson, 'Enemy')) {
@@ -17,8 +17,8 @@ $(document).ready(function() {
             $('.enemy span').html(msgJson.Enemy.CurrentHealth + '/' + msgJson.Enemy.MaxHealth);
         }
 
-        $('wins').html(msgJson.Wins);
-        $('losses').html(msgJson.Wins);
+        $('.wins').html(msgJson.Wins);
+        $('.losses').html(msgJson.Losses);
 
         _.each(msgJson.Log, function(message) {
             // Some app things
